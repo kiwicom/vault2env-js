@@ -1,0 +1,30 @@
+{
+  "name": "vault2env",
+  "version": "0.0.1",
+  "description": "",
+  "bin": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiwicom/vault2env-js.git"
+  },
+  "keywords": [
+    "vault",
+    "dotenv",
+    "env"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kiwicom/vault2env-js/issues"
+  },
+  "homepage": "https://github.com/kiwicom/vault2env-js#readme",
+  "dependencies": {
+    "fs-extra": "^4.0.1",
+    "minimist": "^1.2.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4"
+  }
+}
