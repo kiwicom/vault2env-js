@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs-extra');
 const request = require('request-promise-native');
 const argv = require('minimist')(process.argv.slice(2));
