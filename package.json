@@ -1,5 +1,5 @@
 {
-  "name": "vault2env",
+  "name": "@kiwicom/vault2env",
   "version": "0.0.2",
   "description": "",
   "bin": "index.js",
