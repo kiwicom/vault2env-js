@@ -1,8 +1,8 @@
 # vault2env-js
 
-`vault2env` let's you easily load env variables from your Vault instance and
-save them in `.env` file
+[![Build Status](https://travis-ci.org/kiwicom/vault2env-js.svg?branch=ci-tests)](https://travis-ci.org/kiwicom/vault2env-js)
 
+`vault2env` let's you easily load env variables from your Vault instance and save them in `.env` file
 
 ## Install
 
@@ -14,8 +14,7 @@ Basic usage:
 
 `vault2env --token=[vault-token] --addr=[vault-addr] --path=secret/path/to/envs`
 
-Vault token and address can be set also as env variables - 
-just like with the vault command:
+Vault token and address can be set also as env variables - just like with the vault command:
 
 `VAULT_TOKEN=[token] VAULT_ADDR=[addr] vault2env --path=secret/path/to/envs`
 

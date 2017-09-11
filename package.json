@@ -1,11 +1,11 @@
 {
   "name": "@kiwicom/vault2env",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "bin": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && jest"
+    "test": "yarn lint && jest"
   },
   "repository": {
     "type": "git",
