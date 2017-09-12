@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+- '8'
+- '6'
+script:
+- yarn test
+deploy:
+  provider: npm
+  email: jaroslav.kubicek@gmail.com
+  api_key:
+    secure: c5qZod9MXoBTGMe2sztNpvXjzgamgJi4Vm7BJSNzUHcWJkG87DPgtVD+pCc0eu2xORaoBYkriEH73VzfAMl+0Tn12EH2sWTV8D3D2xNOWA8hsWIOyUQi1ozo8cEXf5Y+9MbMDyuE8h4o9ltUj9KYHTvElpdRNlK+Uvz4NCZjOny6EQJTYl+cbO3/GRsgBvdcz5s8PK3CckyPc65SbnB48qYrA8PIhByQQH789hhFrV80NhXZnVaRvaVT5XL1vsJZH1OZxlMQVWnkI5HsVOAjMtDqMXvIWP+/QBy9O7Fue1MKFrzBT0iLwVqIoq8+uWUHImFpd41lsUB0z9tVP5FarfDJIw08HeM3pHwaZ1ZbE0qkO7Ew8MahSp2ND7mQnG61k49+askyeGuFKXsfoQ7vZ8a91IjgfI4tP2L0Hc84gvZZwY/cu28BcaBiGWBccfTcUkZoZZ5KjOpxpbrg1nyH/aOGtYN/J9/6MIs/FQt67wHo6UE/2MdNmLrLathse617pQOQQOpgsrmp6YfwHYaApKgxKcC7HU+1BA0iBkGR8RdmJ24SCqqEUtr32Af9AArsXTFoakOwm6dASR0vda5T1UWsRRq/WW+WLollRKZxFrnxSXxsL88sTS4DZv8s50EzWASBKrvHfKsTzqap4GdbcPwvSGQ0STY+HeYhmQy9h+E=
+  on:
+    tags: true
+    repo: kiwicom/vault2env-js
