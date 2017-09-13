@@ -50,16 +50,31 @@ const getSecrets = (exports.getSecrets = co.wrap(function*(addr, path, token) {
   }
 }));
 
-const writeEnvFile = (exports.writeEnvFile = co.wrap(function*(secrets, force) {
+const defaultParameters = {
+  force: false,
+  pollute: false,
+};
+
+const writeEnvFile = (exports.writeEnvFile = co.wrap(function*(
+  secrets,
+  userParameters
+) {
+  const parameters = Object.assign({}, defaultParameters, userParameters);
+
   const output = Object.keys(secrets)
-    .map(key => `${key}=${secrets[key]}`)
+    .map(key => {
+      if (parameters.pollute === true) {
+        process.env[key] = secrets[key];
+      }
+      return `${key}=${secrets[key]}`;
+    })
     .join('\n');
 
   if (!output) {
     throw new Error('No secrets to write!');
   }
 
-  if (!force) {
+  if (!parameters.force) {
     if (yield fs.exists('.env')) {
       throw new Error('.env file already exists, use --force to overwrite.');
     }
@@ -72,7 +87,10 @@ if (require.main === module) {
   co(function*() {
     const params = getParams(argv);
     const secrets = yield getSecrets(params.addr, params.path, params.token);
-    yield writeEnvFile(secrets, params.force);
+    yield writeEnvFile(secrets, {
+      force: params.force,
+      pollute: params.pollute,
+    });
 
     return secrets;
   }).then(

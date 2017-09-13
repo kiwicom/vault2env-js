@@ -1,7 +1,7 @@
 extends: prettier
 
 parserOptions:
-  ecmaVersion: 6
+  ecmaVersion: 2017
 
 plugins:
   - prettier
