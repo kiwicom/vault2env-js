@@ -6,8 +6,10 @@ node_js:
 
 script:
   - yarn test
+  - yarn build
 
 deploy:
+  skip_cleanup: true
   provider: npm
   email: jaroslav.kubicek@gmail.com
   api_key:

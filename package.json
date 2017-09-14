@@ -2,10 +2,11 @@
   "name": "@kiwicom/vault2env",
   "version": "0.0.4",
   "description": "",
-  "bin": "index.js",
+  "bin": "lib/index.js",
   "scripts": {
-    "lint": "eslint .",
-    "test": "yarn lint && jest"
+    "lint": "eslint src",
+    "test": "yarn lint && jest src",
+    "build": "babel src -d lib --ignore __tests__"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,8 @@
     "request-promise-native": "^1.0.4"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
     "eslint": "^4.6.1",
     "eslint-config-prettier": "^2.4.0",
     "eslint-config-standard": "^10.2.1",
