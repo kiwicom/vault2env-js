@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const co = require('co');
 const fs = require('fs-extra');
 const request = require('request-promise-native');
 const argv = require('minimist')(process.argv.slice(2));
@@ -14,7 +13,7 @@ const getParams = (exports.getParams = params => {
       const value = params[param] || process.env[envName];
       if (!value) {
         throw new Error(
-          `You must provide Vault ${param} by "${envName}" or --${param}.`
+          `You must provide Vault ${param} by "${envName}" or --${param}.`,
         );
       }
 
@@ -30,10 +29,10 @@ const getParams = (exports.getParams = params => {
   return Object.assign({}, params, vaultParams);
 });
 
-const getSecrets = (exports.getSecrets = co.wrap(function*(addr, path, token) {
+const getSecrets = (exports.getSecrets = async (addr, path, token) => {
   const apiVersion = 'v1';
 
-  const response = yield request([addr, apiVersion, path].join('/'), {
+  const response = await request([addr, apiVersion, path].join('/'), {
     method: 'GET',
     headers: {
       'X-Vault-Token': token,
@@ -45,20 +44,20 @@ const getSecrets = (exports.getSecrets = co.wrap(function*(addr, path, token) {
     return json.data;
   } catch (err) {
     throw new Error(
-      `Error while parsing JSON response from vault: ${err.message}`
+      `Error while parsing JSON response from vault: ${err.message}`,
     );
   }
-}));
+});
 
 const defaultParameters = {
   force: false,
   pollute: false,
 };
 
-const writeEnvFile = (exports.writeEnvFile = co.wrap(function*(
+const writeEnvFile = (exports.writeEnvFile = async (
   secrets,
-  userParameters
-) {
+  userParameters,
+) => {
   const parameters = Object.assign({}, defaultParameters, userParameters);
 
   const output = Object.keys(secrets)
@@ -75,33 +74,30 @@ const writeEnvFile = (exports.writeEnvFile = co.wrap(function*(
   }
 
   if (!parameters.force) {
-    if (yield fs.exists('.env')) {
+    if (await fs.exists('.env')) {
       throw new Error('.env file already exists, use --force to overwrite.');
     }
   }
 
   return fs.writeFile('.env', output, { encoding: 'utf-8' });
-}));
+});
 
 if (require.main === module) {
-  co(function*() {
-    const params = getParams(argv);
-    const secrets = yield getSecrets(params.addr, params.path, params.token);
-    yield writeEnvFile(secrets, {
-      force: params.force,
-      pollute: params.pollute,
-    });
+  (async () => {
+    try {
+      const params = getParams(argv);
+      const secrets = await getSecrets(params.addr, params.path, params.token);
+      await writeEnvFile(secrets, {
+        force: params.force,
+        pollute: params.pollute,
+      });
 
-    return secrets;
-  }).then(
-    secrets => {
       console.log('Retrieved secrets:');
       console.log(Object.keys(secrets).join('\n'));
       console.log('\n.env file created.\n');
-    },
-    err => {
+    } catch (err) {
       console.error(`Error while retrieving secrets: ${err.message}`);
       process.exit(1);
     }
-  );
+  })();
 }
