@@ -2,42 +2,33 @@ const sinon = require('sinon');
 const fs = require('fs-extra');
 const vault2Env = require('../index');
 
-describe('getParams', function() {
-  beforeEach(function() {
+describe('getParams', () => {
+  beforeEach(() => {
     delete process.env.VAULT_TOKEN;
     delete process.env.VAULT_ADDR;
   });
 
-  it('fails when required Vault param is missing', function() {
-    expect.assertions(2);
-
-    try {
+  it('fails when required Vault param is missing', () => {
+    expect(() =>
       vault2Env.getParams({
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
         path: 'secret/sample/env',
-      });
-    } catch (e) {
-      expect(e).toBeInstanceOf(Error);
-      expect(e.message).toBe(
-        'You must provide Vault addr by "VAULT_ADDR" or --addr.'
-      );
-    }
+      }),
+    ).toThrow(
+      new Error('You must provide Vault addr by "VAULT_ADDR" or --addr.'),
+    );
   });
 
-  it('fails when required param is missing', function() {
-    expect.assertions(1);
-
-    try {
+  it('fails when required param is missing', () => {
+    expect(() =>
       vault2Env.getParams({
         addr: 'http:/localhost',
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
-      });
-    } catch (e) {
-      expect(e).toBeInstanceOf(Error);
-    }
+      }),
+    ).toThrow(new Error('You must provide --path.'));
   });
 
-  it('accepts standard Vault env variables as well', function() {
+  it('accepts standard Vault env variables as well', () => {
     process.env.VAULT_ADDR = 'https://example.com';
     const params = {
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
@@ -50,7 +41,7 @@ describe('getParams', function() {
     });
   });
 
-  it('just returns cli arguments if all required are present', function() {
+  it('just returns cli arguments if all required are present', () => {
     const params = {
       addr: 'http:/localhost',
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
@@ -60,82 +51,66 @@ describe('getParams', function() {
   });
 });
 
-describe('writeEnvFile', function() {
-  beforeEach(function() {
+describe('writeEnvFile', () => {
+  beforeEach(() => {
     sinon.stub(fs, 'exists').returns(Promise.resolve(true));
     sinon.stub(fs, 'writeFile').returns(2);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     if (fs.exists.restore) fs.exists.restore();
     if (fs.writeFile.restore) fs.writeFile.restore();
   });
 
-  it('fails when file already exists', function() {
-    expect.assertions(1);
-
-    return vault2Env
-      .writeEnvFile({
+  it('fails when file already exists', async () => {
+    await expect(
+      vault2Env.writeEnvFile({
         EXAMPLE_ENV: 'example-value',
-      })
-      .catch(e =>
-        expect(e.message).toBe(
-          '.env file already exists, use --force to overwrite.'
-        )
-      );
+      }),
+    ).rejects.toEqual(
+      new Error('.env file already exists, use --force to overwrite.'),
+    );
   });
 
-  it('can overwrite file if specified', function() {
-    expect.assertions(1);
+  it('can overwrite file if specified', async () => {
+    await vault2Env.writeEnvFile(
+      {
+        EXAMPLE_ENV: 'example-value',
+      },
+      {
+        force: true,
+      },
+    );
 
-    return vault2Env
-      .writeEnvFile(
-        {
-          EXAMPLE_ENV: 'example-value',
-        },
-        {
-          force: true,
-        }
-      )
-      .then(() => {
-        const output = fs.writeFile.getCall(0).args[1];
-        expect(output).toBe('EXAMPLE_ENV=example-value');
-      });
+    const output = fs.writeFile.getCall(0).args[1];
+    expect(output).toBe('EXAMPLE_ENV=example-value');
   });
 
-  it('pollutes global space', async function() {
-    expect.assertions(4);
+  it('pollutes global space', async () => {
+    await vault2Env.writeEnvFile(
+      {
+        EXAMPLE_ENV: 'example-value',
+      },
+      {
+        force: true,
+      },
+    );
+    let output = fs.writeFile.getCall(0).args[1];
+    expect(output).toBe('EXAMPLE_ENV=example-value');
+    expect(process.env.EXAMPLE_ENV).toBe(undefined);
 
-    await vault2Env
-      .writeEnvFile(
-        {
-          EXAMPLE_ENV: 'example-value',
-        },
-        {
-          force: true,
-        }
-      )
-      .then(() => {
-        const output = fs.writeFile.getCall(0).args[1];
-        expect(output).toBe('EXAMPLE_ENV=example-value');
-        expect(process.env.EXAMPLE_ENV).toBe(undefined);
-      });
-
-    await vault2Env
-      .writeEnvFile(
-        {
-          EXAMPLE_ENV: 'example-value',
-        },
-        {
-          force: true,
-          pollute: true,
-        }
-      )
-      .then(() => {
-        const output = fs.writeFile.getCall(0).args[1];
-        expect(output).toBe('EXAMPLE_ENV=example-value');
-        expect(process.env.EXAMPLE_ENV).toBe('example-value');
-      });
+    await vault2Env.writeEnvFile(
+      {
+        EXAMPLE_ENV: 'example-value',
+      },
+      {
+        force: true,
+        pollute: true,
+      },
+    );
+    output = fs.writeFile.getCall(0).args[1];
+    expect(output).toBe('EXAMPLE_ENV=example-value');
+    expect(process.env.EXAMPLE_ENV).toBe('example-value');
 
     delete process.env.EXAMPLE_ENV;
   });
