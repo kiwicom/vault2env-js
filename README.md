@@ -1,5 +1,7 @@
 # vault2env-js
 
+**This project has been archived and moved to private monorepo.**
+
 [![Build Status](https://travis-ci.org/kiwicom/vault2env-js.svg?branch=ci-tests)](https://travis-ci.org/kiwicom/vault2env-js)
 
 `vault2env` let's you easily load env variables from your Vault instance and save them in `.env` file
