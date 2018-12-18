@@ -1,7 +1,6 @@
 // @flow
 
-const sinon = require('sinon');
-const fs = require('fs-extra');
+const fs = require('fs');
 
 const vault2Env = require('../index');
 
@@ -55,18 +54,13 @@ describe('getParams', () => {
 });
 
 describe('writeEnvFile', () => {
+  let fsWriteFile;
   beforeEach(() => {
-    sinon.stub(fs, 'exists').returns(Promise.resolve(true));
-    sinon.stub(fs, 'writeFile').returns(2);
+    fsWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation(jest.fn());
   });
 
   afterEach(() => {
-    if (fs.exists.restore) {
-      fs.exists.restore();
-    }
-    if (fs.writeFile.restore) {
-      fs.writeFile.restore();
-    }
+    fsWriteFile.mockRestore();
   });
 
   it('fails when file already exists', async () => {
@@ -89,7 +83,7 @@ describe('writeEnvFile', () => {
       },
     );
 
-    const output = fs.writeFile.getCall(0).args[1];
+    const output = fsWriteFile.mock.calls[0][1];
     expect(output).toBe('EXAMPLE_ENV=example-value');
   });
 
@@ -102,7 +96,7 @@ describe('writeEnvFile', () => {
         force: true,
       },
     );
-    let output = fs.writeFile.getCall(0).args[1];
+    let output = fsWriteFile.mock.calls[0][1];
     expect(output).toBe('EXAMPLE_ENV=example-value');
     expect(process.env.EXAMPLE_ENV).toBe(undefined);
 
@@ -115,7 +109,7 @@ describe('writeEnvFile', () => {
         pollute: true,
       },
     );
-    output = fs.writeFile.getCall(0).args[1];
+    output = fsWriteFile.mock.calls[0][1];
     expect(output).toBe('EXAMPLE_ENV=example-value');
     expect(process.env.EXAMPLE_ENV).toBe('example-value');
 
