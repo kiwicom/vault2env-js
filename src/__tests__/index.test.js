@@ -57,18 +57,22 @@ describe('writeEnvFile', () => {
   let fsWriteFile;
   beforeEach(() => {
     fsWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation(jest.fn());
+    jest.spyOn(fs, 'access').mockImplementation((x, y, cb) => cb(null));
   });
 
   afterEach(() => {
     fsWriteFile.mockRestore();
   });
 
-  it('fails when file already exists', async () => {
-    await expect(
-      vault2Env.writeEnvFile({
-        EXAMPLE_ENV: 'example-value',
-      }),
-    ).rejects.toEqual(
+  it('fails when file already exists', () => {
+    expect(() => {
+      vault2Env.writeEnvFile(
+        {
+          EXAMPLE_ENV: 'example-value',
+        },
+        false,
+      );
+    }).toThrow(
       new Error('.env file already exists, use --force to overwrite.'),
     );
   });
@@ -78,41 +82,10 @@ describe('writeEnvFile', () => {
       {
         EXAMPLE_ENV: 'example-value',
       },
-      {
-        force: true,
-      },
+      true,
     );
 
     const output = fsWriteFile.mock.calls[0][1];
     expect(output).toBe('EXAMPLE_ENV=example-value');
-  });
-
-  it('pollutes global space', async () => {
-    await vault2Env.writeEnvFile(
-      {
-        EXAMPLE_ENV: 'example-value',
-      },
-      {
-        force: true,
-      },
-    );
-    let output = fsWriteFile.mock.calls[0][1];
-    expect(output).toBe('EXAMPLE_ENV=example-value');
-    expect(process.env.EXAMPLE_ENV).toBe(undefined);
-
-    await vault2Env.writeEnvFile(
-      {
-        EXAMPLE_ENV: 'example-value',
-      },
-      {
-        force: true,
-        pollute: true,
-      },
-    );
-    output = fsWriteFile.mock.calls[0][1];
-    expect(output).toBe('EXAMPLE_ENV=example-value');
-    expect(process.env.EXAMPLE_ENV).toBe('example-value');
-
-    delete process.env.EXAMPLE_ENV;
   });
 });
