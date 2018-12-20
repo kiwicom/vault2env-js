@@ -12,7 +12,7 @@ describe('getParams', () => {
 
   it('fails when required Vault param is missing', () => {
     expect(() =>
-      vault2Env.getParams({
+      vault2Env._getParams({
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
         path: 'secret/sample/env',
       }),
@@ -23,7 +23,7 @@ describe('getParams', () => {
 
   it('fails when required param is missing', () => {
     expect(() =>
-      vault2Env.getParams({
+      vault2Env._getParams({
         addr: 'http:/localhost',
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       }),
@@ -36,7 +36,7 @@ describe('getParams', () => {
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
     };
-    expect(vault2Env.getParams(params)).toEqual({
+    expect(vault2Env._getParams(params)).toEqual({
       addr: 'https://example.com',
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
@@ -49,7 +49,7 @@ describe('getParams', () => {
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
     };
-    expect(vault2Env.getParams(params)).toEqual(params);
+    expect(vault2Env._getParams(params)).toEqual(params);
   });
 });
 
@@ -66,7 +66,7 @@ describe('writeEnvFile', () => {
 
   it('fails when file already exists', () => {
     expect(() => {
-      vault2Env.writeEnvFile(
+      vault2Env._writeEnvFile(
         {
           EXAMPLE_ENV: 'example-value',
         },
@@ -78,7 +78,7 @@ describe('writeEnvFile', () => {
   });
 
   it('can overwrite file if specified', async () => {
-    await vault2Env.writeEnvFile(
+    await vault2Env._writeEnvFile(
       {
         EXAMPLE_ENV: 'example-value',
       },
