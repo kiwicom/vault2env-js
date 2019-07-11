@@ -16,9 +16,7 @@ describe('getParams', () => {
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
         path: 'secret/sample/env',
       }),
-    ).toThrow(
-      new Error('You must provide Vault addr by "VAULT_ADDR" or --addr.'),
-    );
+    ).toThrow(new Error('You must provide Vault addr by "VAULT_ADDR" or --addr.'));
   });
 
   it('fails when required param is missing', () => {
@@ -72,9 +70,7 @@ describe('writeEnvFile', () => {
         },
         false,
       );
-    }).toThrow(
-      new Error('.env file already exists, use --force to overwrite.'),
-    );
+    }).toThrow(new Error('.env file already exists, use --force to overwrite.'));
   });
 
   it('can overwrite file if specified', async () => {
