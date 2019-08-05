@@ -1,8 +1,15 @@
 // @flow
 
-const fs = require('fs');
+import fs from 'fs';
 
-const vault2Env = require('../index');
+import { _getParams, _writeEnvFile } from '../index';
+
+jest.mock('fs');
+
+function createEnvFile(content: string) {
+  // $FlowExpectedError: this method exists only in our custom mock
+  fs.__setMockFiles({ '.env': content });
+}
 
 describe('getParams', () => {
   beforeEach(() => {
@@ -12,7 +19,7 @@ describe('getParams', () => {
 
   it('fails when required Vault param is missing', () => {
     expect(() =>
-      vault2Env._getParams({
+      _getParams({
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
         path: 'secret/sample/env',
       }),
@@ -21,7 +28,7 @@ describe('getParams', () => {
 
   it('fails when required param is missing', () => {
     expect(() =>
-      vault2Env._getParams({
+      _getParams({
         addr: 'http:/localhost',
         token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       }),
@@ -34,7 +41,7 @@ describe('getParams', () => {
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
     };
-    expect(vault2Env._getParams(params)).toEqual({
+    expect(_getParams(params)).toEqual({
       addr: 'https://example.com',
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
@@ -47,41 +54,46 @@ describe('getParams', () => {
       token: 'a86d995b-6afa-4076-a3ed-90f11c56d5e5',
       path: 'secret/sample/envs',
     };
-    expect(vault2Env._getParams(params)).toEqual(params);
+    expect(_getParams(params)).toEqual(params);
   });
 });
 
 describe('writeEnvFile', () => {
-  let fsWriteFile;
-  beforeEach(() => {
-    fsWriteFile = jest.spyOn(fs, 'writeFile').mockImplementation(jest.fn());
-    jest.spyOn(fs, 'access').mockImplementation((x, y, cb) => cb(null));
-  });
-
-  afterEach(() => {
-    fsWriteFile.mockRestore();
+  it("creates a new file if doesn't exist", async () => {
+    await _writeEnvFile({ EXAMPLE_ENV: 'example-value' }, false);
+    const output = fs.readFileSync('.env');
+    expect(output).toBe('EXAMPLE_ENV=example-value');
   });
 
   it('fails when file already exists', () => {
+    createEnvFile('mocked content');
     expect(() => {
-      vault2Env._writeEnvFile(
-        {
-          EXAMPLE_ENV: 'example-value',
-        },
-        false,
-      );
+      _writeEnvFile({ EXAMPLE_ENV: 'example-value' }, false);
     }).toThrow(new Error('.env file already exists, use --force to overwrite.'));
   });
 
   it('can overwrite file if specified', async () => {
-    await vault2Env._writeEnvFile(
-      {
-        EXAMPLE_ENV: 'example-value',
-      },
-      true,
-    );
+    createEnvFile('mocked content');
+    await _writeEnvFile({ EXAMPLE_ENV: 'example-value' }, true);
+    const output = fs.readFileSync('.env');
+    expect(output).toBe('EXAMPLE_ENV=example-value');
+  });
 
-    const output = fsWriteFile.mock.calls[0][1];
+  it('fails when trying to overwrite already existing keys', () => {
+    createEnvFile('EXAMPLE_ENV="custom local content"');
+    expect(() => {
+      _writeEnvFile({ EXAMPLE_ENV: 'example-value' }, false);
+    }).toThrow(
+      new Error(
+        'Cannot overwrite already existing key: EXAMPLE_ENV (use --force to overwrite anyway)',
+      ),
+    );
+  });
+
+  it('overwrites already existing keys if forced', () => {
+    createEnvFile('EXAMPLE_ENV="custom local content"');
+    _writeEnvFile({ EXAMPLE_ENV: 'example-value' }, true);
+    const output = fs.readFileSync('.env');
     expect(output).toBe('EXAMPLE_ENV=example-value');
   });
 });
